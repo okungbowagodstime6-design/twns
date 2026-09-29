@@ -40,7 +40,7 @@ export async function requireEditorialUser(request: Request) {
 
     if (roleError) return { error: `Editorial role lookup failed: ${roleError.message}`, status: 500 as const };
     if (!role) return { error: `Editorial permission required for ${userData.user.email ?? "this account"}. Add an ADMIN, EDITOR, or SUPER_ADMIN row for this user's UUID.`, status: 403 as const };
-
+// simple edit
     return { supabase, user: userData.user, role: role.role };
   } catch (error: any) {
     return { error: error.message || "Unexpected error.", status: 500 as const };
