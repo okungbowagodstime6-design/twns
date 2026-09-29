@@ -1,0 +1,1 @@
+create policy "editorial users can manage articles" on public.news_articles for all to authenticated using (public.is_editor_or_admin()) with check (public.is_editor_or_admin());

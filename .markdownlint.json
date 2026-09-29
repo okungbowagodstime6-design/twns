@@ -1,0 +1,10 @@
+{
+  "models": [
+    {
+      "title": "Gemini Flash",
+      "provider": "gemini",
+      "model": "gemini-3.8-flash",
+      "apiKey": "AQ.Ab8RN6IVs9jvfxQmURkBESXZHwxmYvWTe6A-mey7_4ioyD3eew"
+    }
+  ]
+}

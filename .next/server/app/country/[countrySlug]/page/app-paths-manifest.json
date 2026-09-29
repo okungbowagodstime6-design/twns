@@ -1,0 +1,3 @@
+{
+  "/country/[countrySlug]/page": "app/country/[countrySlug]/page.js"
+}
