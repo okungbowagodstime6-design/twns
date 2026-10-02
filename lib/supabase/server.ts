@@ -13,9 +13,11 @@ export function createServerSupabaseClient() {
 
 export function createRequestSupabaseClient(accessToken: string) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !serviceRoleKey) throw new Error("Supabase serviceRoleKey configuration is missing.");
-  return createClient(url, serviceRoleKey, {
+  // Use the anon key so Supabase evaluates RLS against the user's JWT.
+  // The service role key bypasses RLS entirely and must NOT be mixed with a user JWT.
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anonKey) throw new Error("Supabase configuration is missing.");
+  return createClient(url, anonKey, {
     global: { headers: { Authorization: `Bearer ${accessToken}` } },
     auth: { autoRefreshToken: false, persistSession: false }
   });
@@ -40,9 +42,9 @@ export async function requireEditorialUser(request: Request) {
 
     if (roleError) return { error: `Editorial role lookup failed: ${roleError.message}`, status: 500 as const };
     if (!role) return { error: `Editorial permission required for ${userData.user.email ?? "this account"}. Add an ADMIN, EDITOR, or SUPER_ADMIN row for this user's UUID.`, status: 403 as const };
-// simple edit
     return { supabase, user: userData.user, role: role.role };
-  } catch (error: any) {
-    return { error: error.message || "Unexpected error.", status: 500 as const };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unexpected error.";
+    return { error: message, status: 500 as const };
   }
 }
