@@ -34,29 +34,33 @@ export default async function HomePage() {
         </div>
       ) : (
         <>
-          <section className="hero-section">
-  <div className="hero-copy">
-    <p className="eyebrow">
-      <span className="live-dot" /> LIVE GLOBAL DESK
-    </p>
-    <h1>
-      The world is moving.
-      <br />
-      <em>Stay in the know.</em>
-    </h1>
-    <p className="hero-description">
-      The World&apos;s News. Personalized for You. Follow the stories shaping your country, your interests, and the world around you.
-    </p>
-    <div className="hero-actions">
-      <Link href="/onboarding" className="button button-light">
-        Personalize my feed <ArrowUpRight size={17} />
-      </Link>
-      <Link href="/search" className="button button-outline">
-        Explore the newsroom
-      </Link>
-    </div>
-  </div>
-</section>
+          {heroArticle ? (
+            <HeroArticle article={heroArticle} />
+          ) : (
+            <section className="hero-section">
+              <div className="hero-copy">
+                <p className="eyebrow">
+                  <span className="live-dot" /> LIVE GLOBAL DESK
+                </p>
+                <h1>
+                  The world is moving.
+                  <br />
+                  <em>Stay in the know.</em>
+                </h1>
+                <p className="hero-description">
+                  The World&apos;s News. Personalized for You. Follow the stories shaping your country, your interests, and the world around you.
+                </p>
+                <div className="hero-actions">
+                  <Link href="/onboarding" className="button button-light">
+                    Personalize my feed <ArrowUpRight size={17} />
+                  </Link>
+                  <Link href="/world" className="button button-outline">
+                    Explore the newsroom
+                  </Link>
+                </div>
+              </div>
+            </section>
+          )}
           <section className="content-shell">
             <div className="section-heading">
               <div>

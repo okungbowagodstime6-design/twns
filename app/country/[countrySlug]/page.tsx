@@ -24,8 +24,9 @@ function countryFromSlug(countrySlug: string) {
   return { code, name };
 }
 
-export default async function CountryPage({ params }: { params: { countrySlug: string } }) {
-  const country = countryFromSlug(params.countrySlug);
+export default async function CountryPage({ params }: { params: Promise<{ countrySlug: string }> }) {
+  const { countrySlug } = await params;
+  const country = countryFromSlug(countrySlug);
   const articles = await getPublishedArticles({ countryCode: country.code, limit: 24 });
 
   return (

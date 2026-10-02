@@ -11,9 +11,10 @@ function titleFromSlug(category: string) {
   return resolveCategorySlug(category).replace(/-/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-export default async function CategoryPage({ params }: { params: { category: string } }) {
-  const title = titleFromSlug(params.category);
-  const articles = await getPublishedArticles({ categorySlug: params.category, limit: 24 });
+export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
+  const { category } = await params;
+  const title = titleFromSlug(category);
+  const articles = await getPublishedArticles({ categorySlug: category, limit: 24 });
 
   return (
     <main>

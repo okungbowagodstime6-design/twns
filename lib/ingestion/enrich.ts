@@ -1,6 +1,12 @@
-import { Article } from './adapters';
+export type IngestionArticle = {
+  title?: string;
+  source_url?: string;
+  category?: string;
+  target_country?: string;
+  importance_score?: number;
+};
 
-export function enrichMetadata(article: Partial<Article>): Article {
+export function enrichMetadata(article: Partial<IngestionArticle>): IngestionArticle {
   // Assign default category
   if (!article.category) {
     article.category = 'General';
@@ -18,5 +24,5 @@ export function enrichMetadata(article: Partial<Article>): Article {
   // Assign importance score
   article.importance_score = article.importance_score ?? 50;
   
-  return article as Article;
+  return article as IngestionArticle;
 }

@@ -1,4 +1,3 @@
-TRUNCATE TABLE articles RESTART IDENTITY CASCADE;
 import Parser from "rss-parser";
 import { canonicalizeUrl, normalizedHash, validateNewsItem } from "./normalize";
 import type { NewsSourceAdapter, NormalizedNewsItem, NewsSource, SourceFetchResult, ValidationResult } from "./types";
@@ -30,29 +29,25 @@ export class RssSourceAdapter implements NewsSourceAdapter {
   }
 
   normalize(item: unknown, source: NewsSource): NormalizedNewsItem {
-      const rssItem = item as RssItem;
-      const url = rssItem.link ?? "";
-      let title = rssItem.title?.trim() ?? "";
+    const rssItem = item as RssItem;
+    const url = rssItem.link ?? "";
+    const title = rssItem.title?.trim() ?? "";
 
-    // Sanitize title by replacing unwanted sources
-      title = title.replace(/BBC/gi, "TWNS");
-    // Add other sources if needed, e.g. /Reuters|CNN|AP/gi
-
-      return {
-        externalId: rssItem.guid ?? rssItem.id ?? null,
-        title,
-        description: rssItem.contentSnippet?.trim() ?? rssItem.content?.trim() ?? null,
-        url,
-        canonicalUrl: canonicalizeUrl(url),
-        publishedAt: rssItem.isoDate ?? rssItem.pubDate ?? null,
-        author: rssItem.creator ?? rssItem.author ?? null,
-        languageCode: source.language_code ?? null,
-        countryCode: source.country_code ?? null,
-        sourceId: source.id,
-        sourceName: <span className="source-label">TWNS NEWS</span>, // override with fixed branding
-        normalizedHash: normalizedHash(title, url)
-      };
-    }
+    return {
+      externalId: rssItem.guid ?? rssItem.id ?? null,
+      title,
+      description: rssItem.contentSnippet?.trim() ?? rssItem.content?.trim() ?? null,
+      url,
+      canonicalUrl: canonicalizeUrl(url),
+      publishedAt: rssItem.isoDate ?? rssItem.pubDate ?? null,
+      author: rssItem.creator ?? rssItem.author ?? null,
+      languageCode: source.language_code ?? null,
+      countryCode: source.country_code ?? null,
+      sourceId: source.id,
+      sourceName: source.name || "TWNS NEWS",
+      normalizedHash: normalizedHash(title, url)
+    };
+  }
 
   validate(item: NormalizedNewsItem): ValidationResult {
     return validateNewsItem(item);

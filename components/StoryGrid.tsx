@@ -19,7 +19,7 @@ export default function StoryGrid({ articles }: { articles: PublicArticle[] }) {
         <Link href={`/article/${article.slug}`} className={`story-card story-card-${accentFor(article)}`} key={article.id}>
           <div className="story-topline">
             <span className="story-category">{article.category || article.article_type || "WORLD"}</span>
-            <span className="story-number">0{index + 1}</span>
+            <span className="story-number">{String(index + 1).padStart(2, "0")}</span>
           </div>
           <h3>{article.title}</h3>
           <p>{article.summary || "Read the attributed report from the TWNS newsroom."}</p>
@@ -27,7 +27,7 @@ export default function StoryGrid({ articles }: { articles: PublicArticle[] }) {
             <span><MapPin size={14} /> {article.country_code || "Global"}</span>
             <span><Clock3 size={14} /> {publishedLabel(article.published_at)}</span>
           </div>
-          <div className="story-source">TWNS NEWS</div>
+          <div className="story-source">{article.source_name ? `SOURCE: ${article.source_name}` : "TWNS NEWS"}</div>
         </Link>
       ))}
     </div>
