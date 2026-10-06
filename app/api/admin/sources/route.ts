@@ -7,7 +7,10 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   const auth = await requireEditorialUser(request);
   if ("error" in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
-  const { data, error } = await auth.supabase.from("news_sources").select("*").order("created_at", { ascending: false });
+  const { data, error } = await auth.supabase
+    .from("news_sources")
+    .select("*, categories(name, slug)")
+    .order("created_at", { ascending: false });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ sources: data });
 }
