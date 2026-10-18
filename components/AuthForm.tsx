@@ -14,7 +14,7 @@ const countryOptions: SearchableOption[] = ALL_COUNTRIES.map((country) => ({ cod
 const languageOptions: SearchableOption[] = ALL_LANGUAGES.map((language) => ({ code: language.code, label: language.name, searchText: `${language.name} ${language.nativeName}`, detail: language.nativeName !== language.name ? language.nativeName : language.code }));
 
 function safeReturnPath(path: string | null) {
-  if (!path || !path.startsWith("/") || path.startsWith("//") || path.startsWith("/sign-in")) return "/settings/profile";
+  if (!path || !path.startsWith("/") || path.startsWith("//") || path.startsWith("/sign-in") || path.startsWith("/sign-up")) return "/settings/profile";
   return path;
 }
 
