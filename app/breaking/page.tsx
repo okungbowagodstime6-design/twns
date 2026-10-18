@@ -6,7 +6,7 @@ export default function BreakingPage() {
   return (
     <NewsDeskPage
       pageKey="breaking"
-      query={{ articleTypes: ["BREAKING", "DEVELOPING"] }}
+      query={{ articleTypes: ["BREAKING", "DEVELOPING"], mainCategory: "breaking" }}
       emptyTitle="No breaking stories available."
       emptySummary="Developing coverage appears here only after it is reviewed and published."
     />

@@ -1,8 +1,1 @@
-{
-  "crons": [
-    {
-      "path": "/api/admin/ingestion/run-due",
-      "schedule": "*/5 * * * *"
-    }
-  ]
-}
+{}

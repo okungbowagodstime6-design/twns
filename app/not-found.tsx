@@ -1,11 +1,9 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import TWNSHeader from "../components/TWNSHeader";
 
 export default function NotFound() {
   return (
     <main>
-      <TWNSHeader />
       <section className="route-hero">
         <p className="section-kicker">404 — Not found</p>
         <h1>Story unavailable</h1>

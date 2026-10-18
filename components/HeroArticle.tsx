@@ -1,33 +1,43 @@
-import Link from 'next/link';
-import { ArrowUpRight } from 'lucide-react';
-import type { PublicArticle } from '@/lib/news/public';
+import Link from "next/link";
+import { ArrowUpRight, Clock3 } from "lucide-react";
+import type { PublicArticle } from "@/lib/news/public";
+
+function publishedLabel(value: string | null) {
+  if (!value) return "Recently published";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? "Recently published"
+    : new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "UTC" }).format(date);
+}
 
 export default function HeroArticle({ article }: { article: PublicArticle | null }) {
   if (!article) return null;
+
+  const category = article.category || article.article_type || "World";
+  const categorySlug = (article.category_slug || article.main_category || category)
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, "-");
+
   return (
-    <section className="hero-section">
+    <section className="hero-section hero-section-typographic">
       <div className="hero-copy">
-        <p className="eyebrow">
-          <span className="live-dot" /> LIVE GLOBAL DESK
+        <div className="hero-topline">
+          <span className={`story-category story-category-${categorySlug}`}>{category}</span>
+          <span className="hero-edition-label">TWNS · LEAD REPORT</span>
+        </div>
+        <h1>{article.title}</h1>
+        <p className="hero-description">
+          {article.summary || "Top story currently trending. Read the attributed report from the TWNS newsroom."}
         </p>
-        <h1>
-          {article.title}
-          <br />
-          {article.summary && <em>{article.summary}</em>}
-        </h1>
-        <p className="hero-description">{article.content || article.summary || 'Top story currently trending.'}</p>
-        <div className="hero-source">{article.source_name ? `SOURCE: ${article.source_name}` : 'TWNS NEWSROOM'}</div>
+        <div className="hero-article-meta">
+          <span>{article.source_name || `${category} News`}</span>
+          <span><Clock3 size={14} aria-hidden="true" /> {publishedLabel(article.published_at)}</span>
+        </div>
         <div className="hero-actions">
-          <Link href={`/article/${article.slug}`} className="button button-light" aria-label={article.title}>
-            Read more <ArrowUpRight size={17} />
+          <Link href={`/article/${article.slug}`} className="button button-light" aria-label={`Read ${article.title}`}>
+            Read the full report <ArrowUpRight size={17} />
           </Link>
         </div>
-      </div>
-      <div className="hero-signal" aria-label="Global coverage snapshot">
-        <div className="signal-ring signal-ring-large" />
-        <div className="signal-ring signal-ring-small" />
-        <span className="signal-label signal-label-top">24 / 7 COVERAGE</span>
-        <span className="signal-label signal-label-bottom">ONE WORLD · MANY STORIES</span>
       </div>
     </section>
   );

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ArrowLeft, Check, LoaderCircle, LogOut, Play, RefreshCw, ShieldAlert, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
-import TWNSHeader from "../../components/TWNSHeader";
 import { browserSupabase } from "../../lib/supabase/browser";
 
 type CategoryInfo = { name: string; slug: string } | null;
@@ -181,9 +180,8 @@ export default function AdminPage() {
   });
 
   return (
-    <main>
-      <TWNSHeader />
-      <section className="route-hero">
+  <main>
+    <section className="route-hero">
         <p className="section-kicker">TWNS NEWSROOM OPERATIONS</p>
         <h1>24/7 Global News Engine</h1>
         <p>Monitor source health, review cross-verified clusters, and manage editorial publishing.</p>

@@ -1,3 +1,0 @@
-{
-  "/api/cron/ingest-news/route": "app/api/cron/ingest-news/route.js"
-}

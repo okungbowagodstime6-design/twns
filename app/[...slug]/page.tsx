@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, Clock3, MapPin } from "lucide-react";
-import TWNSHeader from "../../components/TWNSHeader";
 
 const routeStories = [
   {
@@ -39,7 +38,6 @@ export default async function NewsroomRoute({ params }: { params: Promise<{ slug
 
   return (
     <main>
-      <TWNSHeader />
       <section className="route-hero">
         <p className="section-kicker">TWNS NEWSROOM</p>
         <h1>{title}</h1>

@@ -1,50 +1,49 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowLeft, BookOpen } from "lucide-react";
-import TWNSHeader from "../../../components/TWNSHeader";
 import StoryGrid from "../../../components/StoryGrid";
 import { getPublishedArticles } from "../../../lib/news/public";
+import CountryNewsFilters from "../../../components/CountryNewsFilters";
+import { ALL_COUNTRIES, getCountryByCode } from "../../../lib/constants/countries";
 
-export const revalidate = 60;
+const topics = new Set(["politics", "economy", "crime_social", "government"]);
 
-const countryNames: Record<string, { code: string; name: string }> = {
-  ng: { code: "NG", name: "Nigeria" },
-  nigeria: { code: "NG", name: "Nigeria" },
-  gh: { code: "GH", name: "Ghana" },
-  ke: { code: "KE", name: "Kenya" },
-  za: { code: "ZA", name: "South Africa" },
-  us: { code: "US", name: "United States" },
-  gb: { code: "GB", name: "United Kingdom" }
-};
+export default async function CountryPage({
+  params,
+  searchParams
+}: {
+  params: Promise<{ countrySlug: string }>;
+  searchParams: Promise<{ topic?: string }>;
+}) {
+  const [{ countrySlug }, { topic }] = await Promise.all([params, searchParams]);
+  const normalizedSlug = countrySlug.toLowerCase();
+  const country = getCountryByCode(normalizedSlug)
+    ?? ALL_COUNTRIES.find((item) => item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") === normalizedSlug);
+  if (!country) notFound();
 
-function countryFromSlug(countrySlug: string) {
-  const mapped = countryNames[countrySlug.toLowerCase()];
-  if (mapped) return mapped;
-  const code = countrySlug.length === 2 ? countrySlug.toUpperCase() : countrySlug.replace(/-/g, " ").toUpperCase();
-  const name = countrySlug.replace(/-/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-  return { code, name };
-}
-
-export default async function CountryPage({ params }: { params: Promise<{ countrySlug: string }> }) {
-  const { countrySlug } = await params;
-  const country = countryFromSlug(countrySlug);
-  const articles = await getPublishedArticles({ countryCode: country.code, limit: 24 });
+  const selectedTopic = topic && topics.has(topic) ? topic : "";
+  const articles = await getPublishedArticles({
+    countryCode: country.code,
+    ...(selectedTopic ? { subCategory: selectedTopic } : {}),
+    limit: 24
+  });
 
   return (
     <main>
-      <TWNSHeader />
       <section className="route-hero">
         <p className="section-kicker">COUNTRY DESK</p>
         <h1>{country.name}, in focus.</h1>
         <p>Local stories, public-interest updates, and reporting with the context you need.</p>
       </section>
       <section className="content-shell route-content">
-        <Link href="/my-country" className="text-link"><ArrowLeft size={16} /> Back to my country</Link>
+        <Link href="/countries" className="text-link"><ArrowLeft size={16} /> Browse all countries</Link>
+        <CountryNewsFilters countrySlug={country.code.toLowerCase()} selectedTopic={selectedTopic} />
         {articles.length ? (
           <StoryGrid articles={articles} />
         ) : (
           <div className="empty-state-panel">
             <BookOpen size={32} />
-            <h2>No local stories available yet.</h2>
+            <h2>No {selectedTopic ? `${selectedTopic.replace("_", " ")} ` : ""}stories available yet.</h2>
             <p>Verified country reporting will appear here when published coverage is attributed to {country.name}.</p>
           </div>
         )}

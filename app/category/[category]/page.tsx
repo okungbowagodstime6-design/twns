@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowLeft, BookOpen } from "lucide-react";
-import TWNSHeader from "../../../components/TWNSHeader";
 import StoryGrid from "../../../components/StoryGrid";
 import { getPublishedArticles } from "../../../lib/news/public";
 import { resolveCategorySlug } from "../../../lib/news/classify";
@@ -18,7 +17,6 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
 
   return (
     <main>
-      <TWNSHeader />
       <section className="route-hero">
         <p className="section-kicker">CATEGORY DESK</p>
         <h1>{title}</h1>
