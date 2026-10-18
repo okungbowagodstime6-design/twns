@@ -23,7 +23,7 @@ supabase db reset
 
 Do not put `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET`, or an AI provider key in browser code. Copy `.env.example` to the local environment and fill values through the deployment secret manager.
 
-Vercel Hobby permits only one scheduled cron run per day, so this project does not configure a Vercel cron. The `/api/admin/ingestion/run-due` route requires `CRON_SECRET`. To run it more frequently, configure an external scheduler to send a `POST` request to the production route on the desired schedule, with `CRON_SECRET` as a bearer token in the `Authorization` header. Store the same secret in Vercel's server environment and the scheduler's secret store; never put it in client code or a public workflow file.
+Vercel Hobby permits only one scheduled cron run per day, so frequent ingestion runs use the GitHub Actions workflow in `.github/workflows/ingestion.yml` instead. In the GitHub repository settings, add the `CRON_URL` Actions variable with the production URL ending in `/api/admin/ingestion/run-due`, and add `CRON_SECRET` as an Actions secret. Set the same `CRON_SECRET` in Vercel's server environment. The workflow sends a `POST` request every five minutes with the secret as a bearer token in the `Authorization` header. GitHub may delay scheduled workflow starts during periods of high load; use `workflow_dispatch` to start a run manually. Never put the secret in client code or the workflow file.
 
 Separately, the Supabase `rss-ingest` cron job runs every 15 minutes, keeps Edge Function JWT verification enabled, and reads its gateway JWT and private function token from Supabase Vault. Its handler only creates `REVIEW` articles; editorial approval is required before publication.
 
