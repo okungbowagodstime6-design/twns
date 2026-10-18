@@ -2,16 +2,21 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Clock3, ExternalLink, MapPin, Newspaper } from "lucide-react";
-import TWNSHeader from "../../../components/TWNSHeader";
-import { getPublishedArticle } from "../../../lib/news/public";
+import ShareButtons from "../../../components/ShareButtons";
+import { createArticleMetadata } from "../../../lib/news/article-metadata";
+import { getPublishedArticle, getPublishedArticles } from "../../../lib/news/public";
+import { getSiteUrl } from "../../../lib/site-url";
+import AdSlot from "../../../components/AdSlot";
+import StoryGrid from "../../../components/StoryGrid";
 
 export const revalidate = 60;
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function formatDate(value: string | null): string {
-  if (!value) return "Recently published";
-  return new Date(value).toLocaleDateString("en-GB", {
+  const date = value ? new Date(value) : null;
+  if (!date || Number.isNaN(date.getTime())) return "Recently published";
+  return date.toLocaleDateString("en-GB", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -20,25 +25,31 @@ function formatDate(value: string | null): string {
 
 function formatDatetime(value: string | null): string {
   if (!value) return "";
-  return new Date(value).toISOString();
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString();
 }
 
 function relativeTime(value: string | null): string {
   if (!value) return "";
-  const diffMs = Date.now() - new Date(value).getTime();
-  const mins = Math.floor(diffMs / 60_000);
-  if (mins < 1) return "Just now";
-  if (mins < 60) return `${mins}m ago`;
+  const publishedAt = new Date(value).getTime();
+  if (Number.isNaN(publishedAt)) return "";
+  const diffMs = Date.now() - publishedAt;
+  const future = diffMs < 0;
+  const mins = Math.floor(Math.abs(diffMs) / 60_000);
+  if (mins < 1) return future ? "Soon" : "Just now";
+  if (mins < 60) return `${future ? "in " : ""}${mins}m${future ? "" : " ago"}`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
+  if (hrs < 24) return `${future ? "in " : ""}${hrs}h${future ? "" : " ago"}`;
   const days = Math.floor(hrs / 24);
-  if (days < 7) return `${days}d ago`;
+  if (days < 7) return `${future ? "in " : ""}${days}d${future ? "" : " ago"}`;
   return formatDate(value);
 }
 
 function readingTime(text: string | null): string {
   if (!text) return "";
-  const words = text.trim().split(/\s+/).length;
+  const trimmed = text.trim();
+  if (!trimmed) return "";
+  const words = trimmed.split(/\s+/).length;
   const minutes = Math.max(1, Math.ceil(words / 200));
   return `${minutes} min read`;
 }
@@ -51,18 +62,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const article = await getPublishedArticle(slug);
-  if (!article) return { title: "Story not found | TWNS" };
-  return {
-    title: `${article.title} | TWNS`,
-    description: article.summary ?? "Read the full report on The World News Station.",
-    openGraph: {
-      title: article.title,
-      description: article.summary ?? undefined,
-      type: "article",
-      publishedTime: article.published_at ?? undefined,
-    },
-  };
+  return createArticleMetadata(await getPublishedArticle(slug), slug, "article");
 }
 
 // ─── Page ───────────────────────────────────────────────────────────────────
@@ -76,13 +76,20 @@ export default async function ArticlePage({
   const article = await getPublishedArticle(slug);
 
   if (!article) notFound();
+  const relatedCandidates = await getPublishedArticles({
+    ...(article.category_slug ? { categorySlug: article.category_slug } : {}),
+    limit: 8
+  });
+  const relatedArticles = relatedCandidates.filter((candidate) => candidate.id !== article.id).slice(0, 4);
 
-  const readTime = readingTime(article.content ?? article.summary);
+  const body = article.content?.trim() || article.summary?.trim() || "";
+  const readTime = readingTime(body);
   const relative = relativeTime(article.published_at);
+  const paragraphs = body.split(/\r?\n\s*\r?\n/).map((paragraph) => paragraph.trim()).filter(Boolean);
+  const shareUrl = new URL(`/article/${encodeURIComponent(slug)}`, getSiteUrl()).toString();
 
   return (
     <main>
-      <TWNSHeader />
 
       {/* ── Breadcrumb ── */}
       <div className="article-breadcrumb">
@@ -104,7 +111,9 @@ export default async function ArticlePage({
             {article.article_type === "BREAKING" && (
               <span className="live-dot" aria-hidden="true" />
             )}
-            {article.category ?? article.article_type ?? "WORLD"}
+            <span className={`story-category story-category-${(article.category_slug || article.main_category || article.category || "world").toLowerCase().replace(/[^a-z0-9-]/g, "-")}`}>
+              {article.category ?? article.article_type ?? "WORLD"}
+            </span>
           </p>
 
           <h1 className="article-title">{article.title}</h1>
@@ -123,7 +132,7 @@ export default async function ArticlePage({
               )}
               {article.published_at && (
                 <time
-                  dateTime={formatDatetime(article.published_at)}
+                  dateTime={formatDatetime(article.published_at) || undefined}
                   title={formatDate(article.published_at)}
                 >
                   <Clock3 size={13} aria-hidden="true" />
@@ -140,6 +149,7 @@ export default async function ArticlePage({
               {article.source_name ? `SOURCE: ${article.source_name}` : "TWNS NEWSROOM"}
             </div>
           </div>
+          <ShareButtons title={article.title} url={shareUrl} />
         </header>
 
         {/* ── Rule ── */}
@@ -147,12 +157,10 @@ export default async function ArticlePage({
 
         {/* ── Body ── */}
         <section className="article-body">
-          {(article.content || article.summary) ? (
-            (article.content ?? article.summary)!
-              .split(/\n{2,}/)
-              .map((para, i) => (
-                <p key={i}>{para.trim()}</p>
-              ))
+          {paragraphs.length ? (
+            paragraphs.map((para, i) => (
+              <p key={i}>{para}</p>
+            ))
           ) : (
             <p className="article-placeholder">
               No additional content is available for this report.
@@ -186,6 +194,20 @@ export default async function ArticlePage({
           </Link>
         </footer>
       </article>
+      <div className="article-ad-wrap">
+        <AdSlot slotType="inFeed" slotId={process.env.NEXT_PUBLIC_ADSENSE_INFEED_SLOT} />
+      </div>
+      {relatedArticles.length > 0 && (
+        <section className="content-shell article-related">
+          <div className="section-heading">
+            <div>
+              <p className="section-kicker">CONTINUE READING</p>
+              <h2>Related reports</h2>
+            </div>
+          </div>
+          <StoryGrid articles={relatedArticles} />
+        </section>
+      )}
     </main>
   );
 }

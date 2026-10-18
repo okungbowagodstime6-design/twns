@@ -13,10 +13,8 @@ export function createServerSupabaseClient() {
 
 export function createRequestSupabaseClient(accessToken: string) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  // Use the anon key so Supabase evaluates RLS against the user's JWT.
-  // The service role key bypasses RLS entirely and must NOT be mixed with a user JWT.
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !anonKey) throw new Error("Supabase configuration is missing.");
+  if (!url || !anonKey) throw new Error("Supabase public configuration is missing.");
   return createClient(url, anonKey, {
     global: { headers: { Authorization: `Bearer ${accessToken}` } },
     auth: { autoRefreshToken: false, persistSession: false }
@@ -24,22 +22,20 @@ export function createRequestSupabaseClient(accessToken: string) {
 }
 
 export async function requireEditorialUser(request: Request) {
-  try {
-    const authorization = request.headers.get("authorization");
-    const accessToken = authorization?.startsWith("Bearer ") ? authorization.slice(7) : "";
-    if (!accessToken) return { error: "Authentication required.", status: 401 as const };
+  const authorization = request.headers.get("authorization");
+  const accessToken = authorization?.startsWith("Bearer ") ? authorization.slice(7) : "";
+  if (!accessToken) return { error: "Authentication required.", status: 401 as const };
 
+  try {
     const supabase = createRequestSupabaseClient(accessToken);
     const { data: userData, error: userError } = await supabase.auth.getUser(accessToken);
     if (userError || !userData.user) return { error: "Authentication required.", status: 401 as const };
-
     const { data: role, error: roleError } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", userData.user.id)
       .in("role", ["EDITOR", "ADMIN", "SUPER_ADMIN"])
       .maybeSingle();
-
     if (roleError) return { error: `Editorial role lookup failed: ${roleError.message}`, status: 500 as const };
     if (!role) return { error: `Editorial permission required for ${userData.user.email ?? "this account"}. Add an ADMIN, EDITOR, or SUPER_ADMIN row for this user's UUID.`, status: 403 as const };
     return { supabase, user: userData.user, role: role.role };

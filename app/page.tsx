@@ -3,7 +3,6 @@ import { getPublishedArticles, type PublicArticle } from '../lib/news/public';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 
-import TWNSHeader from '../components/TWNSHeader';
 import HeroArticle from '../components/HeroArticle';
 import StoryGrid from '../components/StoryGrid';
 
@@ -26,7 +25,6 @@ export default async function HomePage() {
 
   return (
     <>
-      <TWNSHeader />
       {error ? (
         <div role="alert" className="error-message">
           <h2>Error loading articles</h2>

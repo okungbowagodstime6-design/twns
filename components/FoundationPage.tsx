@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
-import TWNSHeader from "./TWNSHeader";
 import { foundationCards, foundationTitles } from "../lib/foundation";
 
 export default function FoundationPage({ pageKey }: { pageKey: string }) {
@@ -9,7 +8,6 @@ export default function FoundationPage({ pageKey }: { pageKey: string }) {
 
   return (
     <main>
-      <TWNSHeader />
       <section className="route-hero">
         <p className="section-kicker">{page.kicker}</p>
         <h1>{page.title}</h1>

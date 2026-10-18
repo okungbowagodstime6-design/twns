@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, BookOpen } from "lucide-react";
-import TWNSHeader from "./TWNSHeader";
+import type { ReactNode } from "react";
 import StoryGrid from "./StoryGrid";
 import { foundationTitles } from "../lib/foundation";
 import { getPublishedArticles, type PublishedArticleQuery } from "../lib/news/public";
@@ -9,19 +9,20 @@ export default async function NewsDeskPage({
   pageKey,
   query,
   emptyTitle,
-  emptySummary
+  emptySummary,
+  children
 }: {
   pageKey: string;
   query?: PublishedArticleQuery;
   emptyTitle?: string;
   emptySummary?: string;
+  children?: ReactNode;
 }) {
   const page = foundationTitles[pageKey] ?? foundationTitles.more;
   const articles = await getPublishedArticles({ limit: 24, ...query });
 
   return (
     <main>
-      <TWNSHeader />
       <section className="route-hero">
         <p className="section-kicker">{page.kicker}</p>
         <h1>{page.title}</h1>
@@ -29,6 +30,7 @@ export default async function NewsDeskPage({
       </section>
       <section className="content-shell route-content">
         <Link href="/" className="text-link"><ArrowLeft size={16} /> Back to the front page</Link>
+        {children}
         {articles.length ? (
           <StoryGrid articles={articles} />
         ) : (

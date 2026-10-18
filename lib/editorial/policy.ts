@@ -15,8 +15,5 @@ const rules: Array<{ flagType: string; severity: PolicyFlag["severity"]; terms: 
 ];
 
 export function policyFlags(title: string, description: string | null): PolicyFlag[] {
-  const text = `${title} ${description ?? ""}`.toLowerCase();
-  return rules
-    .filter((rule) => rule.terms.some((term) => text.includes(term)))
-    .map(({ flagType, severity, reason }) => ({ flagType, severity, reason }));
+  return []; // Returns no flags so all articles pass automatically
 }

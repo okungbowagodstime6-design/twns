@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowLeft, Search as SearchIcon } from "lucide-react";
-import TWNSHeader from "@/components/TWNSHeader";
 import StoryGrid from "@/components/StoryGrid";
 import { getPublishedArticles } from "@/lib/news/public";
 
@@ -17,7 +16,6 @@ export default async function SearchPage({
 
   return (
     <main>
-      <TWNSHeader />
       <section className="route-hero">
         <p className="section-kicker">NEWSROOM ARCHIVE</p>
         <h1>Search TWNS</h1>

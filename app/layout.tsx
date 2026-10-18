@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import TWNSHeader from "@/components/TWNSHeader";
+import Footer from "@/components/Footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,7 +12,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body>
+        <TWNSHeader />
         {children}
+        <Footer />
       </body>
     </html>
   );

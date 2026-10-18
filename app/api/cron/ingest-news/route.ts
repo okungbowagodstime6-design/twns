@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { POST as runDueSources } from "@/app/api/admin/ingestion/run-due/route";
+import { NextRequest } from "next/server";
+import { GET as runDueSources } from "../../admin/ingestion/run-due/route";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
